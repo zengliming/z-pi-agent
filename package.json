@@ -1,0 +1,52 @@
+{
+    "name": "z-pi-agent",
+    "version": "0.0.1",
+    "description": "Pi extension package.",
+    "type": "module",
+    "keywords": [
+        "pi-package",
+        "pi",
+        "pi-extension"
+    ],
+    "license": "MIT",
+    "engines": {
+        "node": ">=20.6.0"
+    },
+    "files": [
+        "extsnsions/change-context.ts"
+    ],
+    "pi": {
+        "extensions": [
+            "./extensions"
+        ],
+        "skills": [
+            "./skills"
+        ],
+        "prompts": [
+            "./prompts"
+        ],
+        "themes": [
+            "./themes"
+        ]
+    },
+    "peerDependencies": {
+        "@mariozechner/pi-coding-agent": "*",
+        "@mariozechner/pi-tui": "*"
+    },
+    "peerDependenciesMeta": {
+        "@mariozechner/pi-coding-agent": {
+            "optional": true
+        },
+        "@mariozechner/pi-tui": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "@earendil-works/pi-agent-core": "0.80.3",
+        "@earendil-works/pi-ai": "0.80.3",
+        "@earendil-works/pi-coding-agent": "0.80.3"
+    },
+    "scripts": {
+        "build": "echo 'No build step required'"
+    }
+}
