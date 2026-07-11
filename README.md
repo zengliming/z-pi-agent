@@ -58,7 +58,77 @@ Pi 编码助手扩展包，提供代码变更评估、主题定制等功能。
 | `caseSensitive` | `boolean` | `false` | 是否区分大小写 |
 | `ignoreDirs` | `string` | `node_modules,.git,dist,build,.next` | 忽略的目录 |
 
-### 4. 自定义主题 (`z-theme`)
+### 4. CodeGraph 工具集合 (`codegraph_*`)
+
+通过 `extensions/codegraph/` 注册的 4 个工具（未来会扩展），基于 [CodeGraph](https://github.com/colbymchenry/codegraph) 本地代码知识图谱引擎。
+
+需要先在项目中初始化 CodeGraph：
+
+```bash
+codegraph init
+codegraph index
+```
+
+**提供工具：**
+
+| 工具名称 | 对应 CLI | 用途 |
+|----------|----------|------|
+| `codegraph_search` | `codegraph query` | 按名称搜索符号（函数、类、变量等），支持 kind 过滤 |
+| `codegraph_callers` | `codegraph callers` | 查找调用了某符号的所有函数/方法 |
+| `codegraph_callees` | `codegraph callees` | 查找某函数/方法调用了哪些符号 |
+| `codegraph_impact` | `codegraph impact` | 修改符号前的影响力分析（传递调用链） |
+| `codegraph_files` | `codegraph files` | 查看索引中的文件结构（比 fs 扫描更快） |
+| `codegraph_status` | `codegraph status` | 查看索引健康状态和统计 |
+| `codegraph_affected` | `codegraph affected` | 查找受变更影响的测试文件 |
+| `codegraph_sync` | `codegraph sync` | 增量同步索引（文件变更后使用） |
+| `codegraph_init` | `codegraph init` | 初始化项目代码图索引 |
+
+**调用参数：**
+
+`codegraph_search`
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `query` | `string` | - | 符号名称（支持模糊匹配） |
+| `kind` | `string` | - | 按类型过滤：function, class, method, variable, interface 等 |
+| `limit` | `number` | `20` | 最大结果数 (max 50) |
+
+`codegraph_callers` / `codegraph_callees`
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `symbol` | `string` | - | 符号名称（精确匹配） |
+| `limit` | `number` | `20` | 最大结果数 (max 50) |
+
+`codegraph_impact`
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `symbol` | `string` | - | 符号名称 |
+| `depth` | `number` | `2` | 传递遍历深度 (1-10) |
+
+`codegraph_files`
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `filter` | `string` | - | 过滤子目录（如 `extensions`） |
+| `pattern` | `string` | - | Glob 模式过滤（如 `*.ts`） |
+
+`codegraph_affected`
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `files` | `string[]` | - | 变更的文件路径列表 |
+| `depth` | `number` | `5` | 传递遍历深度 (1-20) |
+| `filter` | `string` | - | 自定义测试文件 glob 模式 |
+
+`codegraph_init`
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `verbose` | `boolean` | `false` | 显示详细索引日志 |
+
+### 5. 自定义主题 (`z-theme`)
 
 `themes/z-theme.json` 提供了一套深色主题配色方案，适用于 Pi TUI 界面。
 
@@ -68,7 +138,20 @@ Pi 编码助手扩展包，提供代码变更评估、主题定制等功能。
 z-pi-agent/
 ├── extensions/
 │   ├── change-context.ts      # 变更上下文工具扩展
-│   └── file-finder.ts         # 文件查找工具扩展
+│   ├── file-finder.ts         # 文件查找工具扩展
+│   └── codegraph/             # CodeGraph 工具集合扩展
+│       ├── index.ts           # 入口
+│       ├── executor.ts        # CLI 执行引擎
+│       └── tools/
+│           ├── search.ts      # codegraph_search
+│           ├── callers.ts     # codegraph_callers
+│           ├── callees.ts     # codegraph_callees
+│           ├── impact.ts      # codegraph_impact
+│           ├── files.ts       # codegraph_files
+│           ├── status.ts      # codegraph_status
+│           ├── affected.ts    # codegraph_affected
+│           ├── sync.ts        # codegraph_sync
+│           └── init.ts        # codegraph_init
 ├── skills/
 │   └── change-assessment/
 │       └── SKILL.md            # 变更评估技能定义
@@ -108,4 +191,6 @@ npm install
 
 1. **评估代码变更**：在 Pi 对话中输入评估变更相关指令，系统会自动触发 `change-assessment` 技能，调用 `change_context` 工具获取变更上下文并输出评估报告。
 
-2. **应用主题**：在 Pi 配置中指定主题为 `z-theme` 即可应用自定义深色主题。
+2. **代码图查询**：在 Pi 对话中询问代码结构相关问题时，系统会自动调用 `codegraph_*` 工具来搜索符号、分析调用链和评估修改影响。
+
+3. **应用主题**：在 Pi 配置中指定主题为 `z-theme` 即可应用自定义深色主题。
